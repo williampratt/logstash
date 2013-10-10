@@ -5,6 +5,7 @@ require "logstash/filters/base"
 require "logstash/inputs/base"
 require "logstash/outputs/base"
 require "logstash/errors"
+require "logstash/queue"
 
 class LogStash::Pipeline
   def initialize(configstr)
@@ -28,13 +29,13 @@ class LogStash::Pipeline
       raise
     end
 
-    @input_to_filter = SizedQueue.new(20)
+    @input_to_filter = LogStash::Queue.new
 
     # If no filters, pipe inputs directly to outputs
     if !filters?
       @filter_to_output = @input_to_filter
     else
-      @filter_to_output = SizedQueue.new(20)
+      @filter_to_output = LogStash::Queue.new
     end
     @settings = {
       "filter-workers" => 1,

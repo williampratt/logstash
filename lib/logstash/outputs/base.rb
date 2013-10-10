@@ -4,6 +4,7 @@ require "logstash/logging"
 require "logstash/plugin"
 require "logstash/namespace"
 require "logstash/config/mixin"
+require "logstash/queue"
 require "uri"
 
 class LogStash::Outputs::Base < LogStash::Plugin
@@ -52,7 +53,7 @@ class LogStash::Outputs::Base < LogStash::Plugin
   def worker_setup
     #return unless @workers > 1
 
-    @worker_queue = SizedQueue.new(20)
+    @worker_queue = LogStash::Queue.new
 
     @worker_threads = @workers.times do |i|
       Thread.new(original_params, @worker_queue) do |params, queue|
