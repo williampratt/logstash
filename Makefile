@@ -392,7 +392,7 @@ show:
 	echo $(VERSION)
 
 .PHONY: prepare-tarball
-prepare-tarball tarball: WORKDIR=build/tarball/logstash-$(VERSION)
+prepare-tarball tidy-tarball tarball: WORKDIR=build/tarball/logstash-$(VERSION)
 prepare-tarball: vendor/kibana $(ELASTICSEARCH) $(JRUBY) $(GEOIP) vendor-gems
 prepare-tarball:
 	@echo "=> Preparing tarball"
@@ -400,9 +400,13 @@ prepare-tarball:
 	$(QUIET)rsync -a --relative bin lib locales vendor/bundle/jruby vendor/geoip vendor/jar vendor/kibana vendor/ua-parser  LICENSE README.md $(WORKDIR)
 	$(QUIET)sed -i -e 's/^LOGSTASH_VERSION = .*/LOGSTASH_VERSION = "$(VERSION)"/' $(WORKDIR)/lib/logstash/version.rb
 
+.PHONY: tidy-tarball
+tidy-tarball:
+	rm -r $(WORKDIR)/vendor/bundle/jruby/1.9/cache
+
 .PHONY: tarball
 tarball: | build/logstash-$(VERSION).tar.gz
-build/logstash-$(VERSION).tar.gz: | prepare-tarball
+build/logstash-$(VERSION).tar.gz: | prepare-tarball tidy-tarball
 	$(QUIET)tar -C $$(dirname $(WORKDIR)) -zcf $@ $$(basename $(WORKDIR))
 	@echo "=> tarball ready: $@"
 
