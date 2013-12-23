@@ -160,7 +160,8 @@ class LogStash::Event
   def to_json(*args)
     begin
       return @data.to_json(*args)
-    rescue
+    rescue GeneratorError
+      JSON.parse {"message" => "invalid characters in log message"}
     end
   end # def to_json
 
